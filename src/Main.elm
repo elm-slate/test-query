@@ -19,10 +19,6 @@ import Slate.Common.Db exposing (..)
 import Utils.Ops exposing (..)
 import Utils.Error exposing (..)
 import Utils.Log exposing (..)
-
-
--- import Postgres exposing (..)
-
 import ParentChildUpdate exposing (..)
 
 
