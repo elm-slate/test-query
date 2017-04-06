@@ -25,6 +25,29 @@ import ParentChildUpdate exposing (..)
 port node : Float -> Cmd msg
 
 
+engineDBInfo : DbConnectionInfo
+engineDBInfo =
+    { host = "testEntitiesServer"
+    , port_ = 5432
+    , database = "test_entities"
+    , user = "postgres"
+    , password = "password"
+    , timeout = 15000
+    }
+
+
+engineConfig : Engine.Config Msg
+engineConfig =
+    { debug = True
+    , logTagger = EngineLog
+    , errorTagger = EngineError
+    , eventProcessingErrorTagger = EventProcessingError
+    , completionTagger = EventProcessingComplete
+    , routeToMeTagger = EngineModule
+    , queryBatchSize = 2 {- kept small to guarantee that multiple event records batches will be retrieved -}
+    }
+
+
 {-|
     Avoid infinitely recursive definition in Model.
 -}
@@ -69,42 +92,6 @@ type alias Entities =
     }
 
 
-engineDBInfo : DbConnectionInfo
-engineDBInfo =
-    { host = "postgresDBServer"
-    , port_ = 5432
-    , database = "test_entities"
-    , user = "charles"
-    , password = "testpassword"
-    , timeout = 15000
-    }
-
-
-engineConfig : Engine.Config Msg
-engineConfig =
-    { debug = True
-    , logTagger = EngineLog
-    , errorTagger = EngineError
-    , eventProcessingErrorTagger = EventProcessingError
-    , completionTagger = EventProcessingComplete
-    , routeToMeTagger = EngineModule
-    , queryBatchSize = 2 {- TODO CHANGE THIS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -}
-    }
-
-
-
--- initModel : Model
--- initModel =
---     { personFragments = Dict.empty
---     , addressFragments = Dict.empty
---     , persons = Dict.empty
---     , addresses = Dict.empty
---     , engineModel = Engine.initModel
---     , queries = Dict.empty
---     , didRefresh = False
---     }
-
-
 executeQuery : Engine.Model Msg -> Maybe String -> Query Msg -> List String -> Result (List String) ( Engine.Model Msg, Cmd Msg, Int )
 executeQuery =
     Engine.executeQuery engineConfig engineDBInfo
@@ -131,16 +118,6 @@ initModel =
           }
         , [ engineCmd ]
         )
-
-
-
--- init : ( Model, Cmd Msg )
--- init =
---     let
---         ( model, cmds ) =
---             initModel
---     in
---         model ! (List.append cmds [ delayUpdateMsg StartApp (1 * second) ])
 
 
 init : ( Model, Cmd Msg )
