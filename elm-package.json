@@ -1,5 +1,5 @@
 {
-    "version": "1.0.2",
+    "version": "1.0.3",
     "summary": "App for testing Slate query",
     "repository": "https://github.com/elm-slate/test-query.git",
     "license": "Unlicense",
