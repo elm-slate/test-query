@@ -38,17 +38,19 @@ engineDBInfo =
 
 engineConfig : Engine.Config Msg
 engineConfig =
-    { debug = True
+    { connectionRetryMax = 3
+    , debug = True
     , logTagger = EngineLog
     , errorTagger = EngineError
     , eventProcessingErrorTagger = EventProcessingError
     , completionTagger = EventProcessingComplete
     , routeToMeTagger = EngineModule
-    , queryBatchSize = 2 {- kept small to guarantee that multiple event records batches will be retrieved -}
+    , queryBatchSize = 2 -- kept small to guarantee that multiple event records batches will be retrieved
     }
 
 
 {-|
+
     Avoid infinitely recursive definition in Model.
 -}
 type WrappedModel
@@ -69,7 +71,7 @@ type alias Model =
     , persons : PersonDict
     , addresses : AddressDict
     , engineModel : Engine.Model Msg
-    , queries : Dict Int (WrappedModel -> Result (ProjectionErrors) WrappedModel)
+    , queries : Dict Int (WrappedModel -> Result ProjectionErrors WrappedModel)
     , didRefresh : Bool
     }
 
@@ -215,7 +217,7 @@ update msg model =
                     -- event =
                     --     eventRecord.event
                 in
-                    handleMutationCascadingDelete Person.defaultFragment Person.mutate model.personFragments eventRecord.event
+                    handleMutationCascadingDelete Person.defaultFragment Person.mutate model.personFragments eventRecord
                         |> processCascadingMutationResult
                             queryId
                             eventRecord
@@ -242,7 +244,7 @@ update msg model =
                     l =
                         Debug.log "MutateAddress" eventRecord
                 in
-                    handleMutation Address.defaultFragment Address.mutate model.addressFragments eventRecord.event
+                    handleMutation Address.defaultFragment Address.mutate model.addressFragments eventRecord
                         |> processMutationResult
                             (\model newDict -> { model | addressFragments = Debug.log "New Address Dictionary" newDict })
                             (mutationError "Address")
@@ -327,7 +329,7 @@ unwrapModel wrappedModel =
             model
 
 
-projectPerson : WrappedModel -> Result (ProjectionErrors) WrappedModel
+projectPerson : WrappedModel -> Result ProjectionErrors WrappedModel
 projectPerson wrappedModel =
     let
         model =
@@ -355,9 +357,10 @@ defaultAddress =
 
 
 {-|
+
     Convert address fragment to address
 -}
-toAddress : Address.Fragment -> Result (ProjectionErrors) Address
+toAddress : Address.Fragment -> Result ProjectionErrors Address
 toAddress addressFragment =
     projectEntity
         []
@@ -378,7 +381,7 @@ defaultPerson =
 
 {-| convert person fragment to person
 -}
-toPerson : AddressDict -> Person.Fragment -> Result (ProjectionErrors) Person
+toPerson : AddressDict -> Person.Fragment -> Result ProjectionErrors Person
 toPerson addresses personFragment =
     let
         getPerson address =
